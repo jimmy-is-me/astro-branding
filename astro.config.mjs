@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://example.pages.dev'
+  site: 'https://jimmy-is-me.github.io',
+  base: '/astro-branding',
 });
