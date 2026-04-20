@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Astro 形象網站範例" description="使用 Astro 製作的形象網站範例，可部署到 Cloudflare Pages。">
+  <header class="site-header" id="top">
+    <div class="container nav-wrap">
+      <a class="logo" href="#top">Astro Brand</a>
+      <nav class="nav">
+        <a href="#about">關於</a>
+        <a href="#services">服務</a>
+        <a href="#process">流程</a>
+        <a href="#contact">聯絡</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <p class="section-tag">Astro Branding Site</p>
+          <h1>這是標題</h1>
+          <p class="subtitle">這是副標題。這個版本使用 Astro 製作，版型走專業形象網站風格，適合後續改成品牌官網或接案展示頁。</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#contact">立即聯絡</a>
+            <a class="btn btn-secondary" href="#services">查看服務</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <span class="hero-label">快速特色</span>
+          <h2>靜態快速、結構清楚、容易維護</h2>
+          <p>你可以把這個範例延伸成一頁式網站、多頁形象網站，或搭配部落格內容頁。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <div class="container narrow">
+        <p class="section-tag">About</p>
+        <h2>這是一個 Astro 範例網站</h2>
+        <p>此頁面參考現代化作品展示與品牌網站常見結構，使用元件化 layout 與 page 架構，後續要擴充也比較方便。</p>
+      </div>
+    </section>
+
+    <section id="services" class="section alt">
+      <div class="container">
+        <p class="section-tag">Services</p>
+        <h2>服務項目</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>服務一</h3>
+            <p>這是服務一的範例內容，可放形象網站、商業官網或 Landing Page 製作。</p>
+            <a href="#contact">了解更多</a>
+          </article>
+          <article class="card">
+            <h3>服務二</h3>
+            <p>這是服務二的範例內容，可放設計整合、前端切版或網站維護服務。</p>
+            <a href="#process">查看流程</a>
+          </article>
+          <article class="card">
+            <h3>服務三</h3>
+            <p>這是服務三的範例內容，可放品牌顧問、功能規劃或客製化開發。</p>
+            <a href="#about">查看介紹</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="process" class="section">
+      <div class="container">
+        <p class="section-tag">Process</p>
+        <h2>合作流程</h2>
+        <div class="steps">
+          <div class="step"><strong>01</strong><span>需求討論</span></div>
+          <div class="step"><strong>02</strong><span>版型規劃</span></div>
+          <div class="step"><strong>03</strong><span>網站製作</span></div>
+          <div class="step"><strong>04</strong><span>上線部署</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section contact-section">
+      <div class="container contact-box">
+        <div>
+          <p class="section-tag">Contact</p>
+          <h2>聯絡我們</h2>
+          <p>按鈕與導覽都已經可正常使用，後續你只要替換成自己的聯絡方式即可。</p>
+        </div>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="mailto:hello@example.com">寄信聯絡</a>
+          <a class="btn btn-secondary" href="https://github.com/jimmy-is-me/astro-branding" target="_blank" rel="noopener">GitHub 專案</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-wrap">
+      <p>© 2026 Astro Brand. All rights reserved.</p>
+      <a href="#top">回到上方</a>
+    </div>
+  </footer>
+</BaseLayout>
