@@ -1,19 +1,236 @@
 ---
-const { title = '形象網站', description = 'Astro 形象網站範例' } = Astro.props;
+import '../styles/base.css';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import LeftSidebar from '../components/LeftSidebar.astro';
+import RightSidebar from '../components/RightSidebar.astro';
+import LoadingSplash from '../components/LoadingSplash.astro';
+import {
+  siteName as defaultSiteName,
+  siteNameEn,
+  navLinks as defaultNavLinks,
+  footerNavLinks,
+  socialLinks,
+  latestNewsDate,
+  latestNewsTitle,
+} from '../data/site';
+
+interface Props {
+  title: string;
+  description?: string;
+  siteName?: string;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description = '',
+  siteName = defaultSiteName,
+  ogImage = '',
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+const now = new Date();
+const weekdays = ['Sun.', 'Mon.', 'Tue.', 'Wed.', 'Thu.', 'Fri.', 'Sat.'];
+const currentDate = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} ${weekdays[now.getDay()]}`;
 ---
-<!DOCTYPE html>
-<html lang="zh-Hant">
+
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <title>{title.includes(siteNameEn) || title.includes(siteName) ? title : `${title} — ${siteNameEn}`}</title>
+    {description && <meta name="description" content={description} />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonicalURL} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles/global.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <slot />
+    <LoadingSplash />
+    <div class="page-atmosphere" aria-hidden="true">
+      <span class="page-atmosphere__glow page-atmosphere__glow--north"></span>
+      <span class="page-atmosphere__glow page-atmosphere__glow--south"></span>
+    </div>
+    <LeftSidebar
+      currentDate={currentDate}
+      latestNewsDate={latestNewsDate}
+      latestNewsTitle={latestNewsTitle}
+    />
+    <RightSidebar socialLinks={socialLinks} />
+    <Navigation siteName={siteName} links={defaultNavLinks} />
+
+    <div class="site-wrapper">
+      <main>
+        <slot />
+      </main>
+      <Footer
+        siteName={siteName}
+        navLinks={footerNavLinks}
+        socialLinks={socialLinks}
+        copyrightYear={new Date().getFullYear()}
+      />
+    </div>
+
+    <script>
+      import { loadGsap } from '../utils/animations';
+      import { initFormaMotion } from '../utils/animations';
+
+      let cleanup: (() => void) | undefined;
+      let isTransitioning = false;
+
+      function waitForImages(container: Element): Promise<void> {
+        const imgs = Array.from(container.querySelectorAll('img'))
+          .filter((img) => img.loading !== 'lazy');
+        if (imgs.length === 0) return Promise.resolve();
+        return Promise.all(
+          imgs.map((img) => {
+            if (img.complete) return Promise.resolve();
+            return new Promise<void>((resolve) => {
+              img.addEventListener('load', () => resolve(), { once: true });
+              img.addEventListener('error', () => resolve(), { once: true });
+            });
+          })
+        ).then(() => {});
+      }
+
+      async function bootMotion() {
+        cleanup?.();
+        cleanup = await initFormaMotion(document);
+      }
+
+      async function navigateTo(url: string) {
+        if (isTransitioning) return;
+        isTransitioning = true;
+
+        const gsap = await loadGsap();
+        const main = document.querySelector('main');
+        if (!gsap || !main) { window.location.href = url; return; }
+
+        await gsap.to(main, { opacity: 0, y: -16, duration: 0.3, ease: 'power2.in' });
+
+        try {
+          const res = await fetch(url);
+          const html = await res.text();
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newMain = doc.querySelector('main');
+          const newTitle = doc.querySelector('title')?.textContent;
+
+          if (!newMain) { window.location.href = url; return; }
+
+          const clonedMain = newMain.cloneNode(true) as HTMLElement;
+          clonedMain.style.opacity = '0';
+          main.replaceWith(clonedMain);
+
+          document.querySelectorAll('style[data-spa-page]').forEach((s) => s.remove());
+          doc.head.querySelectorAll('style').forEach((style) => {
+            const clone = style.cloneNode(true) as HTMLStyleElement;
+            clone.setAttribute('data-spa-page', 'true');
+            document.head.appendChild(clone);
+          });
+
+          const freshMain = document.querySelector('main');
+          if (!freshMain) { window.location.href = url; return; }
+
+          if (newTitle) document.title = newTitle;
+          window.history.pushState({}, '', url);
+          window.scrollTo({ top: 0, behavior: 'instant' });
+
+          const path = new URL(url, window.location.origin).pathname;
+          document.querySelectorAll('[data-nav-link]').forEach((link) => {
+            const href = (link as HTMLAnchorElement).getAttribute('href') || '';
+            const isActive = path === href || (href !== '/' && path.startsWith(href));
+            link.classList.toggle('is-active', isActive);
+          });
+
+          await waitForImages(freshMain);
+          cleanup?.();
+          cleanup = await initFormaMotion(document);
+
+          gsap.fromTo(freshMain,
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out' }
+          );
+        } catch {
+          window.location.href = url;
+        } finally {
+          isTransitioning = false;
+        }
+      }
+
+      function initSpaNav() {
+        document.addEventListener('click', (e) => {
+          const anchor = (e.target as Element).closest('a[href]') as HTMLAnchorElement | null;
+          if (!anchor) return;
+          if (anchor.hostname !== window.location.hostname || anchor.target === '_blank' || anchor.hasAttribute('download')) return;
+          const href = anchor.getAttribute('href');
+          if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+          e.preventDefault();
+          navigateTo(anchor.href);
+        });
+        window.addEventListener('popstate', () => { navigateTo(window.location.href); });
+      }
+
+      async function initialFadeIn() {
+        const gsap = await loadGsap();
+        const main = document.querySelector('main');
+        if (gsap && main) {
+          await waitForImages(main);
+          gsap.fromTo(main, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' });
+        }
+      }
+
+      bootMotion();
+      initSpaNav();
+      initialFadeIn();
+    </script>
   </body>
 </html>
+
+<style>
+  .page-atmosphere {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: clip;
+  }
+
+  .page-atmosphere__glow {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(10px);
+    opacity: 0.4;
+  }
+
+  .page-atmosphere__glow--north {
+    top: -12rem;
+    right: -6rem;
+    width: 28rem;
+    height: 28rem;
+    background: radial-gradient(circle, rgba(192, 57, 43, 0.14), transparent 70%);
+  }
+
+  .page-atmosphere__glow--south {
+    bottom: 8rem;
+    left: -9rem;
+    width: 24rem;
+    height: 24rem;
+    background: radial-gradient(circle, rgba(146, 43, 33, 0.08), transparent 72%);
+  }
+</style>
