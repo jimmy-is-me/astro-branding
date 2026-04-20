@@ -1,0 +1,101 @@
+---
+interface Props {
+  currentDate?: string;
+  latestNewsDate?: string;
+  latestNewsTitle?: string;
+}
+
+const {
+  currentDate = '',
+  latestNewsDate = '',
+  latestNewsTitle = '',
+} = Astro.props;
+---
+
+<aside class="left-sidebar" aria-label="Sidebar information">
+  <div class="left-sidebar__inner">
+    <span class="sidebar-date">{currentDate}</span>
+    <span class="sidebar-rule" aria-hidden="true"></span>
+    {latestNewsDate && <span class="sidebar-news-date">{latestNewsDate}</span>}
+    {latestNewsTitle && <span class="sidebar-news-title">{latestNewsTitle}</span>}
+    <span class="sidebar-rule" aria-hidden="true"></span>
+    <span class="sidebar-label">News</span>
+  </div>
+</aside>
+
+<style>
+  .left-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--layout-sidebar-left);
+    height: 100vh;
+    background-color: var(--color-cream);
+    border-right: 1px solid var(--color-rule);
+    z-index: 10;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: calc(var(--layout-nav-height) + 24px);
+  }
+
+  .left-sidebar__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .left-sidebar__inner > * {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    white-space: nowrap;
+  }
+
+  .sidebar-date {
+    font-family: var(--font-sans);
+    font-size: var(--text-sidebar);
+    color: var(--color-ink-light);
+    letter-spacing: 0.05em;
+  }
+
+  .sidebar-rule {
+    display: block;
+    writing-mode: horizontal-tb;
+    width: 20px;
+    height: 1px;
+    background-color: var(--color-rule);
+    flex-shrink: 0;
+  }
+
+  .sidebar-news-date {
+    font-family: var(--font-sans);
+    font-size: var(--text-sidebar);
+    color: var(--color-ink-light);
+    letter-spacing: 0.05em;
+  }
+
+  .sidebar-news-title {
+    font-family: var(--font-sans);
+    font-size: var(--text-sidebar);
+    color: var(--color-ink-mid);
+    max-height: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.04em;
+  }
+
+  .sidebar-label {
+    font-family: var(--font-display);
+    font-size: var(--text-sidebar);
+    color: var(--color-ink-light);
+    letter-spacing: var(--ls-wider);
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 1024px) {
+    .left-sidebar { display: none; }
+  }
+</style>

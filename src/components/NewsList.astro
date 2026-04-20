@@ -1,0 +1,88 @@
+---
+interface NewsItem {
+  slug: string;
+  data: {
+    title: string;
+    date: Date;
+    category?: string;
+  };
+}
+
+interface Props {
+  items: NewsItem[];
+}
+
+const { items } = Astro.props;
+
+function withBase(path: string): string {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  return path === '/' ? `${base}/` : `${base}/${path.replace(/^\//, '')}`;
+}
+---
+
+<ul class="news-list">
+  {items.map((item) => (
+    <li class="news-list__item">
+      <a href={withBase(`/journal/${item.slug}`)} class="news-list__link">
+        <div class="news-list__meta">
+          <time class="news-list__date" datetime={item.data.date.toISOString()}>
+            {item.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </time>
+          {item.data.category && (
+            <span class="news-list__category">{item.data.category}</span>
+          )}
+        </div>
+        <h3 class="news-list__title">{item.data.title}</h3>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .news-list { display: grid; gap: 0; }
+
+  .news-list__item {
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .news-list__item:first-child {
+    border-top: 1px solid var(--color-rule);
+  }
+
+  .news-list__link {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1.4rem 0;
+    transition: opacity var(--transition-fast);
+  }
+
+  .news-list__link:hover { opacity: 0.65; }
+
+  .news-list__meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .news-list__date {
+    font-size: var(--text-xs);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--color-ink-light);
+  }
+
+  .news-list__category {
+    font-size: var(--text-xs);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--color-red);
+  }
+
+  .news-list__title {
+    font-family: var(--font-serif);
+    font-size: var(--text-h3);
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--color-ink);
+  }
+</style>
